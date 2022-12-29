@@ -36,14 +36,16 @@ class Predictor():
             dir1[i_out, j_out, k_out, :] = out_dir1.reshape([len(i_out), 3])
             dir2[i_out, j_out, k_out, :] = out_dir2.reshape([len(i_out), 3])
 
-        self.save_nii(odfsh, affine, header, foutpre + '_odfsh_pred.nii')
-        self.save_nii(dir1, affine, header, foutpre + '_dir1_pred.nii')
-        self.save_nii(dir2, affine, header, foutpre + '_dir2_pred.nii')
+        self.save_nii(odfsh, affine, header, foutpre + '_odfsh_pred.nii.gz')
+        self.save_nii(dir1, affine, header, foutpre + '_dir1_pred.nii.gz')
+        self.save_nii(dir2, affine, header, foutpre + '_dir2_pred.nii.gz')
 
     def predict_batch(self, shbatch):
         with torch.no_grad():
-            out_odfsh, out_p, out_dir1, out_dir2 = self.model(shbatch)
-        out_dir2 = out_dir2 * (out_p > 0.5).float().to(out_dir2.device)
+            out_odfsh, out_p1, out_p2, out_dir1, out_dir2 = self.model(shbatch)
+            out_odfsh = out_odfsh[..., 1:2, 1:2, 1:2]
+        out_dir1 = out_dir1 * (out_p1 > 0.5).float().to(out_dir1.device)
+        out_dir2 = out_dir2 * (out_p2 > 0.5).float().to(out_dir2.device)
         return out_odfsh, out_dir1, out_dir2
 
     def load_nii(self, fn):

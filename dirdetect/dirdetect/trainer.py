@@ -23,19 +23,18 @@ class Trainer:
         self.pre_model = pre_model
 
     def train_epoch(self, data_loader, trainBool, loss_record):
-        for i, (inData, inODFSH, inDir, inNum) in enumerate(data_loader):
-            print(i)
+        for i, (inData, inODFSH, inDir, inInd) in enumerate(data_loader):
             if self.use_gpu:
                 inData = inData.cuda()
                 inODFSH = inODFSH.cuda()
                 inDir = inDir.cuda()
-                inNum = inNum.cuda()
+                inInd = inInd.cuda()
 
             if trainBool:
                 self.optimizer.zero_grad()
 
             out = self.model(inData)
-            loss_dict, loss = self.loss_func(out, inODFSH, inDir, inNum)
+            loss_dict, loss = self.loss_func(out, inODFSH, inDir, inInd)
             for key, value in loss_dict.items():
                 loss_record[key].append(value)
 
